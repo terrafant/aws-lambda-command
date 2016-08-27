@@ -12,8 +12,7 @@ import java.io.IOException;
 
 public class S3Service {
 
-    private static final BasicAWSCredentials AWS_CREDENTIALS = new BasicAWSCredentials(Constants.ACCESS_KEY, Constants.SECRET_KEY);
-    private AmazonS3Client s3Client = new AmazonS3Client(AWS_CREDENTIALS);
+    private AmazonS3Client s3Client = new AmazonS3Client();
 
     public String getS3Object(LambdaLogger logger, String bucketName, String key) throws IOException {
         logger.log("bucketName = " + bucketName + ", key = " + key);
