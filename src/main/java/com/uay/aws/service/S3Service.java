@@ -1,10 +1,8 @@
 package com.uay.aws.service;
 
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.S3Object;
-import com.uay.aws.Constants;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.IOUtils;
 

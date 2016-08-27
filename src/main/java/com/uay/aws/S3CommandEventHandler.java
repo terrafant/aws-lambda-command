@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.event.S3EventNotification.S3EventNotificationRecord;
 import com.uay.aws.service.JdbcService;
 import com.uay.aws.service.S3Service;
+import com.uay.aws.service.SqsService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -15,6 +16,7 @@ public class S3CommandEventHandler implements RequestHandler<S3Event, String> {
 
     private JdbcService jdbcService = new JdbcService();
     private S3Service s3Service = new S3Service();
+    private SqsService sqsService = new SqsService();
 
     @Override
     public String handleRequest(S3Event event, Context context) {
@@ -30,6 +32,11 @@ public class S3CommandEventHandler implements RequestHandler<S3Event, String> {
             }
         }
 
+        try {
+            jdbcService.release();
+        } catch (SQLException e) {
+            logger.log(e.toString());
+        }
         return "Finished processing event";
     }
 
@@ -40,10 +47,8 @@ public class S3CommandEventHandler implements RequestHandler<S3Event, String> {
         if (!isObjectRemovedEvent(record)) {
             data = s3Service.getS3Object(logger, getS3EventBucketName(record), s3ObjectKey);
         }
-        long version = jdbcService.getEventVersion(s3ObjectKey);
-        logger.log("version = " + version);
-        jdbcService.persistEvent(s3ObjectKey, data, version);
-        jdbcService.release();
+        jdbcService.persistEvent(logger, s3ObjectKey, data);
+        sqsService.sendQueueMessage(logger, s3ObjectKey);
     }
 
     private static String getS3ObjectKey(S3EventNotificationRecord record) {
