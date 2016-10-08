@@ -18,7 +18,7 @@ public class JdbcService {
     private static final String DB_PASSWORD = "DB_PASSWORD";
 
     private static final String INSERT_INTO_EVENTS = "INSERT INTO events(name, data, version) VALUES(?, ?, ?)";
-    private static final String SELECT_LAST_VERSION_FROM_EVENTS = "SELECT max(version) FROM events WHERE name=?";
+    private static final String SELECT_LAST_VERSION_FROM_EVENTS = "SELECT max(version), data FROM events WHERE name=?";
     private static final String CONNECTION_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
 
     private Connection connection = getDbConnection();
@@ -61,7 +61,17 @@ public class JdbcService {
         return version;
     }
 
-    public void release() throws SQLException {
-        connection.close();
+    public String getPreviousEvent(String key) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(SELECT_LAST_VERSION_FROM_EVENTS);
+        preparedStatement.setString(1, key);
+
+        String data = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()) {
+            data = resultSet.getString(2);
+        }
+        resultSet.close();
+        preparedStatement.close();
+        return data;
     }
 }

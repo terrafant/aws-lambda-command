@@ -1,6 +1,0 @@
-{
-  "id": 1,
-  "text": "Some text message",
-  "author": "Anton",
-  "tags": ["java", "cqrs", "aws"]
-}
